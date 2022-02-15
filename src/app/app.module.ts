@@ -4,6 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
 
 import { AppComponent } from "./app.component";
+import { PostService } from "./post.service";
 
 @NgModule({
   declarations: [AppComponent],
