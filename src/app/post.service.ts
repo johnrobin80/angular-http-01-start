@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { map } from "rxjs/operators";
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
+import { map, catchError, tap } from "rxjs/operators";
 import { Post } from "./post.model";
-import { Subject } from "rxjs";
+import { Subject, throwError } from "rxjs";
 
 @Injectable({
   providedIn: "root",
@@ -17,7 +17,10 @@ export class PostService {
     this.http
       .post<{ name: string }>(
         "https://ng-complete-guide-ca764-default-rtdb.firebaseio.com/posts.json",
-        postData
+        postData,
+        {
+          observe: "response",
+        }
       )
       .subscribe(
         (responseData) => {
@@ -32,7 +35,11 @@ export class PostService {
   FetchPost() {
     return this.http
       .get<{ [key: string]: Post }>(
-        "https://ng-complete-guide-ca764-default-rtdb.firebaseio.com/posts.json"
+        "https://ng-complete-guide-ca764-default-rtdb.firebaseio.com/posts.json",
+        {
+          headers: new HttpHeaders({ "Custom-Header": "Hello" }),
+          params: new HttpParams().set("print", "pretty"),
+        }
       )
       .pipe(
         // map((responseData: { [key: string]: Post }) => {
@@ -45,13 +52,25 @@ export class PostService {
             }
           }
           return postsArray;
+        }),
+        catchError((errorRes) => {
+          return throwError(errorRes);
         })
       );
   }
 
   DeletePosts() {
-    return this.http.delete(
-      "https://ng-complete-guide-ca764-default-rtdb.firebaseio.com/posts.json"
-    );
+    return this.http
+      .delete(
+        "https://ng-complete-guide-ca764-default-rtdb.firebaseio.com/posts.json",
+        {
+          observe: "events",
+        }
+      )
+      .pipe(
+        tap((event) => {
+          console.log(event);
+        })
+      );
   }
 }
